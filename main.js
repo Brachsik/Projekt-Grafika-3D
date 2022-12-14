@@ -17,7 +17,7 @@ function Brush() {
     new THREE.BoxGeometry(15, 1, 1),
     new THREE.MeshBasicMaterial({ color: 0xf0f00f })
   );
-
+  ``;
   const two = new THREE.Mesh(
     new THREE.BoxGeometry(4, 1, 1),
     new THREE.MeshBasicMaterial({ color: 0xffffff })
@@ -31,7 +31,18 @@ function Brush() {
   return brush;
 }
 
-const colors = { COLORS: [{ color: 0xfbc02d }, { color: 0xfbc02d }] };
+const colors = {
+  COLORS: [
+    { color: 0xffff6b },
+    { color: 0xf9f98b },
+    { color: 0xf9f99e },
+    { color: 0xf9f9b0 },
+    { color: 0xf9f9c0 },
+    { color: 0xf7f7d3 },
+    { color: 0xf9f9e0 },
+    { color: 0xf5f5ee },
+  ],
+};
 
 function Teeth(color) {
   const brush = new THREE.Group();
@@ -57,10 +68,6 @@ function Teeth(color) {
 
 const renderer = new THREE.WebGLRenderer();
 
-console.log(scene);
-console.log(camera);
-console.log(renderer);
-
 renderer.setSize(innerWidth, innerHeight);
 
 renderer.setPixelRatio(devicePixelRatio);
@@ -76,7 +83,9 @@ const mesh = new THREE.Mesh(boxGeometry, material);
 const brush = new Brush();
 scene.add(brush);
 
-const teeth = new Teeth(colors.COLORS[1]);
+let currentColor = 0;
+
+const teeth = new Teeth(colors.COLORS[currentColor]);
 teeth.position.y = -5;
 scene.add(teeth);
 
@@ -89,17 +98,14 @@ let left = false;
 
 function setupKeyLogger() {
   document.onkeydown = function (e) {
-    console.log(e.keyCode);
     switch (e.keyCode) {
       case 37:
         left = true;
         right = false;
-        console.log(brush.position);
         break;
       case 39:
         left = false;
         right = true;
-        console.log(brush.position);
         break;
       case 32:
         BrushRotate = !BrushRotate;
@@ -112,19 +118,42 @@ brush.position.y += 4;
 
 let rotation = 0.1;
 
+let brushCount = 0;
+let side = -1;
+
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 0, 12);
 scene.add(light);
+
+async function changeTeeth() {
+  if (brushCount % 1 == 0 && currentColor < 7) {
+    currentColor++;
+
+    const newTeeth = new Teeth(colors.COLORS[currentColor]);
+    newTeeth.position.y = -5;
+
+    setTimeout(() => scene.add(newTeeth), 200);
+  }
+}
 
 function animate() {
   requestAnimationFrame(animate);
   if (left && brush.position.x >= -6) {
     brush.position.x -= 0.5;
     if (brush.position.x == -6 && BrushRotate) {
-      console.log("bruh");
+      brushCount++;
+      side = -1;
+      console.log(brushCount);
+      changeTeeth();
     }
-  } else if (left && brush.position.x <= 6 && brush.position.x > 6.5) {
-    console.log("bruh");
+  }
+  if (right && brush.position.x < 18.5 && brush.position.x >= 18) {
+    if (BrushRotate) {
+      brushCount++;
+      side = 1;
+      console.log(brushCount);
+      changeTeeth();
+    }
   }
   if (right && brush.position.x <= 18) {
     brush.position.x += 0.5;
