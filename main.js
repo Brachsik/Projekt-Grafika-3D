@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { BoxGeometry } from "three";
 
 const scene = new THREE.Scene();
 
